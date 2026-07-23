@@ -1,6 +1,0 @@
-requests<3,>=2.32
-pandas<4,>=2.2
-pyarrow<24,>=17
-PyYAML<7,>=6.0
-streamlit<2,>=1.40
-plotly<7,>=5.24

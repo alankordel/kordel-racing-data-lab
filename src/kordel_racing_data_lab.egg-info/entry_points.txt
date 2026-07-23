@@ -1,2 +1,0 @@
-[console_scripts]
-kordel-racing = kordel_racing.cli:main
