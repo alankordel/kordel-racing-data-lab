@@ -1,0 +1,79 @@
+{
+  "meeting_key": 1276,
+  "session_key": 9839,
+  "extracted_at_utc": "2026-07-23T23:39:16.873458+00:00",
+  "datasets": [
+    {
+      "endpoint": "sessions",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 1,
+      "file": "sessions.parquet"
+    },
+    {
+      "endpoint": "drivers",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 20,
+      "file": "drivers.parquet"
+    },
+    {
+      "endpoint": "laps",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 1156,
+      "file": "laps.parquet"
+    },
+    {
+      "endpoint": "stints",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 47,
+      "file": "stints.parquet"
+    },
+    {
+      "endpoint": "pit",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 27,
+      "file": "pit.parquet"
+    },
+    {
+      "endpoint": "weather",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 154,
+      "file": "weather.parquet"
+    },
+    {
+      "endpoint": "position",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 668,
+      "file": "position.parquet"
+    },
+    {
+      "endpoint": "session_result",
+      "params": {
+        "session_key": 9839
+      },
+      "status": "success",
+      "records": 20,
+      "file": "session_result.json"
+    }
+  ]
+}

@@ -57,6 +57,19 @@ Os arquivos gerados ficam em `data/{bronze,silver,gold}` e não são versionados
 
 Tráfego, combustível, bandeiras e clima podem afetar os tempos. As métricas descrevem a amostra e não provam causalidade.
 
+### Dados de exemplo versionados
+
+A pasta `data/samples/session_9839` contém uma execução de referência em formatos fáceis de inspecionar:
+
+- `json/`: respostas Bronze da OpenF1 e metadados da extração;
+- `csv/`: quatro tabelas analíticas Gold.
+
+Para atualizar os exemplos após executar o pipeline:
+
+```bash
+python scripts/export_samples.py --meeting-key 1276 --session-key 9839
+```
+
 ## Estrutura
 
 ```text
@@ -76,4 +89,3 @@ A OpenF1 é não oficial, disponibiliza dados históricos desde 2023 e pode alte
 ## Aprendizados
 
 O projeto demonstra separação entre extração e transformação, idempotência por sessão, armazenamento colunar, testes sem internet, observabilidade por logs e construção de métricas com limitações explícitas.
-
