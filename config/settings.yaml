@@ -1,0 +1,19 @@
+openf1:
+  base_url: https://api.openf1.org/v1
+  timeout_seconds: 30
+  requests_per_second: 3
+pipeline:
+  # Corrida de Abu Dhabi de 2025, usada nos exemplos atuais da OpenF1.
+  meeting_key: 1276
+  session_key: 9839
+  output_dir: data
+  endpoints:
+    - sessions
+    - drivers
+    - laps
+    - stints
+    - pit
+    - weather
+    - position
+    - session_result
+

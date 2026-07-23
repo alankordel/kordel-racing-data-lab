@@ -1,0 +1,1 @@
+"""Integração com fontes externas."""
