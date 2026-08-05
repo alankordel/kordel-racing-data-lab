@@ -56,10 +56,19 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
     total_rows = len(frame)
     if frame.empty:
         warning = QualityIssue("dataset_not_empty", "O dataset laps está vazio.", 0, [])
-        return QualityResult(contract.dataset, "WARNING", 0, 0, 0, warnings=[warning])
+        return QualityResult(
+            contract.dataset,
+            "WARNING",
+            0,
+            0,
+            0,
+            warnings=[warning],
+            evaluated_rules=["dataset_not_empty"],
+        )
 
     errors_with_masks: list[tuple[QualityIssue, pd.Series]] = []
     warnings: list[QualityIssue] = []
+    evaluated_rules = ["dataset_not_empty", "required_columns"]
     missing = [column for column in contract.required_columns if column not in frame.columns]
     if missing:
         mask = pd.Series(True, index=frame.index)
@@ -73,6 +82,7 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
 
     available_keys = [column for column in contract.non_nullable_columns if column in frame.columns]
     for column in available_keys:
+        evaluated_rules.append(f"{column}_not_null")
         mask = frame[column].isna()
         if mask.any():
             errors_with_masks.append(
@@ -82,6 +92,7 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
     for column in contract.numeric_columns:
         if column not in frame.columns:
             continue
+        evaluated_rules.append(f"{column}_numeric")
         mask = _numeric_mask(frame[column])
         if mask.any():
             errors_with_masks.append(
@@ -91,6 +102,7 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
     for column in ("session_key", "driver_number", "lap_number"):
         if column not in frame.columns:
             continue
+        evaluated_rules.append(f"{column}_positive")
         numeric = pd.to_numeric(frame[column], errors="coerce")
         mask = numeric.notna() & (numeric <= 0)
         if mask.any():
@@ -99,6 +111,7 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
             )
 
     if "lap_duration" in frame.columns:
+        evaluated_rules.extend(["lap_duration_nullable", "lap_duration_positive_finite"])
         duration = pd.to_numeric(frame["lap_duration"], errors="coerce")
         null_mask = frame["lap_duration"].isna()
         if null_mask.any():
@@ -125,6 +138,7 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
             )
 
     if all(column in frame.columns for column in contract.logical_key):
+        evaluated_rules.append("logical_key_unique")
         duplicate_mask = frame.duplicated(subset=list(contract.logical_key), keep=False)
         if duplicate_mask.any():
             duplicate_count = int(frame.duplicated(subset=list(contract.logical_key), keep="first").sum())
@@ -147,4 +161,5 @@ def validate_laps(frame: pd.DataFrame, contract: DataContract = LAPS_CONTRACT) -
         invalid_rows=invalid_rows,
         errors=errors,
         warnings=warnings,
+        evaluated_rules=evaluated_rules,
     )

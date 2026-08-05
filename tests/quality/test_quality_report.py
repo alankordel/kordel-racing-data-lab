@@ -21,6 +21,9 @@ def test_saves_quality_report_as_json(tmp_path):
     assert payload["session_key"] == 1
     assert payload["warning_count"] == 1
     assert payload["status"] == "WARNING"
+    rule_statuses = {item["rule"]: item["status"] for item in payload["rule_results"]}
+    assert rule_statuses["lap_duration_nullable"] == "WARNING"
+    assert rule_statuses["logical_key_unique"] == "PASS"
 
 
 def configure_pipeline_mocks(monkeypatch, tmp_path, laps: pd.DataFrame | None):
