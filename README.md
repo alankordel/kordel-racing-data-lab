@@ -10,6 +10,26 @@ dashboard interativo de desempenho e estratégia.
 ![Streamlit](https://img.shields.io/badge/dashboard-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
 ![Arquitetura](https://img.shields.io/badge/arquitetura-medalhão-C9A227)
 
+## Status do projeto
+
+> **Projeto de aprendizado em evolução.** Estou construindo este laboratório de forma incremental para praticar
+> Engenharia de Dados com um problema que gosto: análise de Fórmula 1. Cada sprint representa uma etapa do meu estudo,
+> com decisões que procuro compreender, testar e documentar para conseguir explicá-las com clareza.
+
+Neste momento, a Sprint 2 está em fase de revisão. Nela estou praticando:
+
+- contratos de dados e definição explícita de schemas;
+- validações de estrutura, tipos, domínio, valores nulos e duplicidade;
+- separação entre erros críticos e avisos de qualidade;
+- relatórios de qualidade e observabilidade do pipeline;
+- testes unitários com dados sintéticos e mocks;
+- integração contínua com GitHub Actions;
+- comunicação visual de métricas com Streamlit e Plotly;
+- documentação das decisões, limitações e próximos passos.
+
+O objetivo não é apresentar uma solução definitiva, mas registrar minha evolução e aplicar os conceitos de maneira
+simples, funcional e explicável.
+
 ## Preview
 
 ![Visão geral do dashboard Kordel Racing Data Lab](docs/assets/dashboard-overview.png)
