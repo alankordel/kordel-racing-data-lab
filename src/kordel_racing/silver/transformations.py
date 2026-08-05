@@ -32,7 +32,7 @@ def duration_to_seconds(value: object) -> float | None:
         return None
 
 
-def standardize_dataframe(frame: pd.DataFrame) -> pd.DataFrame:
+def standardize_dataframe(frame: pd.DataFrame, remove_duplicates: bool = True) -> pd.DataFrame:
     result = frame.copy()
     result.columns = [
         re.sub(r"_+", "_", re.sub(r"[^a-z0-9]+", "_", str(column).strip().lower())).strip("_")
@@ -49,7 +49,9 @@ def standardize_dataframe(frame: pd.DataFrame) -> pd.DataFrame:
         for column in ("session_key", "driver_number", "lap_number", "stint_number", "date")
         if column in result.columns
     ]
-    return result.drop_duplicates(subset=keys or None).reset_index(drop=True)
+    if remove_duplicates:
+        result = result.drop_duplicates(subset=keys or None)
+    return result.reset_index(drop=True)
 
 
 def build_silver(bronze_dir: str | Path, output_dir: str | Path, session_key: int) -> Path:
@@ -61,8 +63,8 @@ def build_silver(bronze_dir: str | Path, output_dir: str | Path, session_key: in
         if file.name == "metadata.json":
             continue
         raw = pd.read_parquet(file) if file.suffix == ".parquet" else pd.read_json(file)
-        frame = standardize_dataframe(raw)
         name = DATASET_NAMES.get(file.stem, file.stem)
+        frame = standardize_dataframe(raw, remove_duplicates=name != "laps")
         if name == "laps" and "lap_duration" in frame:
             frame["lap_duration_seconds"] = frame["lap_duration"].map(duration_to_seconds)
             for sector in ("duration_sector_1", "duration_sector_2", "duration_sector_3"):
