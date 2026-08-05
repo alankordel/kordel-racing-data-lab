@@ -1,14 +1,46 @@
 # Kordel Racing Data Lab
 
-Pipeline local de dados de Fórmula 1 que consome a API pública OpenF1, organiza dados nas camadas Bronze, Silver e Gold e apresenta análises em um dashboard Streamlit.
+Pipeline local de dados de Fórmula 1 que transforma dados históricos da OpenF1 em tabelas analíticas confiáveis e um
+dashboard interativo de desempenho e estratégia.
 
-## Arquitetura e tecnologias
+[![CI](https://github.com/alankordel/kordel-racing-data-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/alankordel/kordel-racing-data-lab/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)
+![pytest](https://img.shields.io/badge/testes-pytest-0A9EDC?logo=pytest&logoColor=white)
+![Ruff](https://img.shields.io/badge/lint-Ruff-D7FF64?logo=ruff&logoColor=black)
+![Streamlit](https://img.shields.io/badge/dashboard-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![Arquitetura](https://img.shields.io/badge/arquitetura-medalhão-C9A227)
 
-```text
-OpenF1 -> Bronze/Parquet -> Silver/Parquet -> Gold/Parquet -> Streamlit + Plotly
+## Preview
+
+![Visão geral do dashboard Kordel Racing Data Lab](docs/assets/dashboard-overview.png)
+
+A captura usa os dados reais processados da sessão 9839. As instruções para atualizá-la estão em
+[docs/assets/README.md](docs/assets/README.md).
+
+## Principais funcionalidades
+
+- ingestão configurável de oito endpoints históricos da OpenF1;
+- armazenamento Parquet nas camadas Bronze, Silver e Gold;
+- contrato e validações de qualidade para voltas antes das métricas Gold;
+- relatórios JSON com erros, warnings e registros de exemplo;
+- análises de ritmo, consistência, pneus e pit stops;
+- dashboard Streamlit com filtros por sessão, equipe e piloto;
+- testes sem internet, Ruff e integração contínua no GitHub Actions;
+- amostra versionada da sessão 9839 em JSON e CSV.
+
+## Arquitetura
+
+```mermaid
+flowchart LR
+    A["OpenF1 API"] --> B["Bronze<br/>Dados brutos"]
+    B --> C["Silver<br/>Dados tratados"]
+    C --> D["Data Quality<br/>Contratos e validações"]
+    D --> E["Gold<br/>Métricas analíticas"]
+    E --> F["Streamlit<br/>Dashboard"]
 ```
 
-Python 3.12+, requests, pandas, PyArrow, YAML, pytest, Ruff, Streamlit e Plotly. A arquitetura completa e suas limitações estão em [docs/architecture.md](docs/architecture.md); as tabelas estão em [docs/data_dictionary.md](docs/data_dictionary.md).
+Python 3.12+, requests, pandas, PyArrow, YAML, pytest, Ruff, Streamlit e Plotly. As decisões estão em
+[docs/architecture.md](docs/architecture.md) e as tabelas em [docs/data_dictionary.md](docs/data_dictionary.md).
 
 ## Instalação
 
@@ -22,70 +54,90 @@ pip install -e .
 
 ## Execução
 
-O exemplo configurado é a corrida de Abu Dhabi de 2025 (`session_key=9839`):
+O exemplo configurado é a corrida de Abu Dhabi de 2025 (`meeting_key=1276`, `session_key=9839`):
 
 ```bash
 python main.py
 ```
 
-Para escolher outra sessão sem editar arquivos:
+Para escolher outra sessão:
 
 ```bash
 python -m kordel_racing.cli run --meeting-key 1276 --session-key 9839
 ```
 
-Também é possível indicar `--output-dir` e uma lista após `--endpoints`. Configurações permanentes ficam em `config/settings.yaml`. Consulte `meetings` e `sessions` na [documentação OpenF1](https://openf1.org/docs/) para descobrir chaves válidas.
+Também é possível usar `--output-dir` e `--endpoints`. Configurações permanentes ficam em `config/settings.yaml`.
 
-## Dashboard e qualidade
+## Dashboard
 
 ```bash
 streamlit run dashboard/app.py
+```
+
+O dashboard lê somente a camada Gold local. Ele apresenta KPIs de melhor volta e consistência, comparação de ritmo,
+stints de pneus e pit stops, com filtros na barra lateral.
+
+## Qualidade dos dados
+
+O contrato de `laps` valida colunas obrigatórias, chaves não nulas, tipos numéricos, valores positivos e finitos e
+unicidade de `session_key + driver_number + lap_number`. Duração nula é aceita com `WARNING`; erros críticos geram o
+relatório `data/quality/laps_quality_<session_key>.json` e impedem a criação da Gold.
+
+Detalhes e limitações estão em [docs/data_quality.md](docs/data_quality.md).
+
+```bash
 pytest --cov=src/kordel_racing
 ruff check .
 ```
 
-O dashboard não consulta a internet e orienta executar o pipeline quando não há dados.
+## Dados de exemplo
 
-## Saídas e análises
-
-Os arquivos gerados ficam em `data/{bronze,silver,gold}` e não são versionados. O resumo traz melhor volta, média, mediana, consistência (desvio-padrão), total e média de pit stops, resultado final e compostos. As análises cobrem:
-
-1. ritmo e melhores voltas entre pilotos;
-2. consistência de tempos por piloto;
-3. degradação descritiva de pneus por regressão linear em cada stint;
-4. distribuição de duração dos pit stops.
-
-Tráfego, combustível, bandeiras e clima podem afetar os tempos. As métricas descrevem a amostra e não provam causalidade.
-
-### Dados de exemplo versionados
-
-A pasta `data/samples/session_9839` contém uma execução de referência em formatos fáceis de inspecionar:
-
-- `json/`: respostas Bronze da OpenF1 e metadados da extração;
-- `csv/`: quatro tabelas analíticas Gold.
-
-Para atualizar os exemplos após executar o pipeline:
+`data/samples/session_9839/json` contém respostas Bronze e metadados; `data/samples/session_9839/csv` contém as quatro
+tabelas Gold. Para atualizar as amostras após executar o pipeline:
 
 ```bash
 python scripts/export_samples.py --meeting-key 1276 --session-key 9839
 ```
 
-## Estrutura
+## Estrutura do projeto
 
 ```text
-config/            configuração YAML
-dashboard/         aplicação Streamlit
-data/              camadas geradas
-docs/              arquitetura e dicionário
-src/kordel_racing/ cliente, transformações, métricas e CLI
-tests/             testes unitários e fixtures sintéticas
-.github/workflows/ integração contínua
+config/                     configuração YAML
+dashboard/                  aplicação Streamlit
+data/                       camadas geradas e amostras versionadas
+docs/                       arquitetura, qualidade e dicionário
+src/kordel_racing/quality/  contratos, validadores e relatórios
+src/kordel_racing/          cliente, transformações, métricas e CLI
+tests/                      testes unitários e fixtures sintéticas
+.github/workflows/          integração contínua
 ```
 
 ## Limitações e roadmap
 
-A OpenF1 é não oficial, disponibiliza dados históricos desde 2023 e pode alterar schemas. O MVP tolera endpoints vazios e registra falhas, mas ainda não possui contratos formais de schema. Evoluções naturais são contratos por endpoint, testes de integração opcionais, análises climáticas alinhadas no tempo e uma execução Spark/Databricks não obrigatória.
+A OpenF1 é uma fonte não oficial e pode alterar schemas. A degradação é descritiva e não controla tráfego, combustível,
+clima, bandeiras ou diferenças de estratégia. O contrato atual valida apenas `laps` e ainda não verifica relações entre
+datasets.
+
+Concluído:
+
+- [x] pipeline Bronze, Silver e Gold;
+- [x] métricas analíticas e dashboard;
+- [x] testes e integração contínua;
+- [x] documentação de arquitetura;
+- [x] contrato inicial para `laps`.
+
+Próximos passos:
+
+- [ ] contratos para os demais endpoints;
+- [ ] validações entre datasets;
+- [ ] testes opcionais de integração;
+- [ ] análise de clima;
+- [ ] execução opcional com Spark/Databricks;
+- [ ] PostgreSQL como camada de serving;
+- [ ] FastAPI;
+- [ ] deploy público do dashboard.
 
 ## Aprendizados
 
-O projeto demonstra separação entre extração e transformação, idempotência por sessão, armazenamento colunar, testes sem internet, observabilidade por logs e construção de métricas com limitações explícitas.
+O projeto demonstra separação entre extração e transformação, arquitetura medalhão, armazenamento colunar, contratos de
+dados, observabilidade por relatórios, testes sem internet e métricas com limitações explícitas.

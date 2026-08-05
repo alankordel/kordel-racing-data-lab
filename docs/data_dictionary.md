@@ -12,7 +12,7 @@ Cada arquivo preserva as colunas do endpoint OpenF1. `metadata.json` registra `e
 |---|---|
 | `drivers` | `session_key`, `driver_number`, `full_name`, `team_name` |
 | `sessions` | `meeting_key`, `session_key`, `session_name`, `date_start`, `date_end` |
-| `laps` | `session_key`, `driver_number`, `lap_number`, `lap_duration_seconds`, setores |
+| `laps` | `session_key`, `driver_number`, `lap_number`, `lap_duration`, `lap_duration_seconds`, setores |
 | `stints` | `driver_number`, `stint_number`, `lap_start`, `lap_end`, `compound`, `tyre_age_at_start` |
 | `pit_stops` | `driver_number`, `lap_number`, `pit_duration_seconds`, `stop_duration` |
 | `weather` | `date`, `air_temperature`, `track_temperature`, `rainfall` |
@@ -29,3 +29,8 @@ Cada arquivo preserva as colunas do endpoint OpenF1. `metadata.json` registra `e
 
 `consistency_std` é o desvio-padrão amostral: menor valor indica tempos mais próximos. `degradation_per_lap` é a inclinação da regressão linear do tempo contra o número da volta; valores positivos indicam aumento de tempo, sem afirmar causalidade.
 
+## Qualidade
+
+O contrato de `laps` usa `session_key + driver_number + lap_number` como chave lógica. As três colunas não aceitam nulos
+e devem conter números positivos. `lap_duration` deve ser numérica, positiva e finita quando preenchida, mas pode ser
+nula em voltas sem cronometragem válida. Consulte [data_quality.md](data_quality.md) para todas as regras.
