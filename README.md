@@ -81,6 +81,15 @@ src/kordel_racing/ cliente, transformações, métricas e CLI
 tests/             testes unitários e fixtures sintéticas
 .github/workflows/ integração contínua
 ```
+## Planejamento do projeto
+
+O desenvolvimento é organizado em sprints, com acompanhamento das entregas concluídas e das próximas evoluções.
+
+[📋 Acompanhar roadmap e sprints no Notion]## Planejamento do projeto
+
+O desenvolvimento é organizado em sprints, com acompanhamento das entregas concluídas e das próximas evoluções.
+
+[📋 Acompanhar roadmap e sprints no Notion](https://heather-magazine-f34.notion.site/abee3865404c4b4ba3fe0e93e88a874b?v=1157855968ea4d8ab829da89102a7855&source=copy_link)
 
 ## Limitações e roadmap
 
