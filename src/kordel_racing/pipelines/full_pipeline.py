@@ -2,9 +2,13 @@
 
 import logging
 
+import pandas as pd
+
 from kordel_racing.api.client import OpenF1Client
 from kordel_racing.bronze.ingestion import ingest_session
 from kordel_racing.gold.metrics import create_gold_tables
+from kordel_racing.quality.report import save_quality_report
+from kordel_racing.quality.validators import DataQualityError, validate_laps
 from kordel_racing.silver.transformations import build_silver
 from kordel_racing.utils.config import load_settings
 from kordel_racing.utils.logging import configure_logging
@@ -23,6 +27,17 @@ def run_pipeline(config_path: str = "config/settings.yaml", **overrides: object)
     )
     silver = build_silver(bronze, pipeline["output_dir"], pipeline["session_key"])
     LOGGER.info("Camada Silver concluída: %s", silver)
+    laps_path = silver / "laps.parquet"
+    laps = pd.read_parquet(laps_path) if laps_path.exists() else pd.DataFrame()
+    quality_result = validate_laps(laps)
+    report_path = save_quality_report(quality_result, pipeline["output_dir"], pipeline["session_key"])
+    LOGGER.info("Qualidade de laps: %s. Relatório salvo: %s", quality_result.status, report_path)
+    if quality_result.has_errors:
+        raise DataQualityError(
+            f"Validação de laps encontrou {len(quality_result.errors)} erro(s) crítico(s).",
+            quality_result,
+            str(report_path),
+        )
     tables = create_gold_tables(silver, pipeline["output_dir"], pipeline["session_key"])
     LOGGER.info("Camada Gold concluída: %s tabelas", len(tables))
     LOGGER.info("Pipeline finalizado com sucesso.")

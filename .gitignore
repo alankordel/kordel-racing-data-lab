@@ -11,6 +11,8 @@ htmlcov/
 data/bronze/*
 data/silver/*
 data/gold/*
+data/quality/*
 !data/bronze/.gitkeep
 !data/silver/.gitkeep
 !data/gold/.gitkeep
+!data/quality/.gitkeep

@@ -13,13 +13,13 @@ O exemplo usa a corrida de Abu Dhabi de 2025 (`meeting_key=1276`, `session_key=9
 ## Fluxo
 
 ```text
-OpenF1 REST -> Bronze (resposta e metadados) -> Silver (limpeza e tipos)
-                                                -> Gold (métricas) -> Streamlit
+OpenF1 REST -> Bronze -> Silver -> Data Quality -> Gold -> Streamlit
 ```
 
 - **Bronze:** um Parquet por endpoint e `metadata.json` com consulta, horário, contagem e status. O pipeline usa JSON como
   fallback quando um campo mistura tipos incompatíveis com Parquet (por exemplo, `gap_to_leader` numérico e `"+1 LAP"`).
 - **Silver:** nomes em snake_case, strings limpas, datas UTC, durações numéricas e duplicados removidos.
+- **Data Quality:** aplica o contrato de `laps`, gera relatório JSON e interrompe a Gold quando encontra erros críticos.
 - **Gold:** desempenho por volta, resumo da sessão, análise de stints e pit stops.
 - **Consumo:** dashboard lê somente os arquivos Gold; não chama a API.
 
@@ -28,6 +28,7 @@ OpenF1 REST -> Bronze (resposta e metadados) -> Silver (limpeza e tipos)
 - Python, pandas e Parquet mantêm a solução portátil e familiar.
 - YAML centraliza sessão, endpoints, timeouts e diretório.
 - Falha em um endpoint fica registrada sem perder datasets já coletados.
+- Warnings de qualidade são observáveis, mas não bloqueiam; erros estruturais, de tipo, domínio ou chave bloqueiam a Gold.
 - Não há banco, orquestrador ou cloud obrigatórios neste MVP.
 - Dados gerados não são versionados.
 
@@ -37,4 +38,5 @@ A OpenF1 é uma fonte não oficial. Campos podem mudar e alguns não existem em 
 
 ## Próximos passos
 
-Adicionar contratos de schema por endpoint, testes de integração opt-in, particionamento por temporada e adaptação opcional para Spark/Databricks.
+Adicionar contratos para os demais endpoints, validações entre datasets, testes de integração opt-in, particionamento
+por temporada e adaptação opcional para Spark/Databricks.
